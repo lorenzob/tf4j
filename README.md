@@ -1,5 +1,4 @@
 # tf4j
-TensorFlow experiments with Java
 
 This is a simple project to learn TensorFlow using the Java API.
 
