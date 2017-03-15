@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 
-package tensorflow;
+package nottrz.tf4j.samples;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -23,12 +23,15 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+
 import org.tensorflow.DataType;
 import org.tensorflow.Graph;
 import org.tensorflow.Output;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
 import org.tensorflow.TensorFlow;
+
+import nottrz.tf4j.core.TensorFlowAPI;
 
 /** Sample use of the TensorFlow Java API to label images using a pre-trained model. */
 public class LabelImage {

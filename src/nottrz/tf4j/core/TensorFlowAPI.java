@@ -1,15 +1,20 @@
-package tensorflow;
+package nottrz.tf4j.core;
+
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.tensorflow.DataType;
 import org.tensorflow.Graph;
 import org.tensorflow.Output;
 import org.tensorflow.Session;
+import org.tensorflow.Session.Runner;
+import org.tensorflow.Shape;
 import org.tensorflow.Tensor;
 
 // In the fullness of time, equivalents of the methods of this class should be auto-generated from
 // the OpDefs linked into libtensorflow_jni.so. That would match what is done in other languages
 // like Python, C++ and Go.
-class TensorFlowAPI implements AutoCloseable {
+public class TensorFlowAPI implements AutoCloseable {
 	
 	private Graph graph;
 	private Session defaultSession;
@@ -39,7 +44,7 @@ class TensorFlowAPI implements AutoCloseable {
 	}
 
 
-	public Output mul(Output in1, Output in2, String name) {
+	public Output multiply(Output in1, Output in2, String name) {
 		return binaryOp("Mul", name, in1, in2);
 	}
 
@@ -57,9 +62,29 @@ class TensorFlowAPI implements AutoCloseable {
 	}
 
 	public Output constant(Object value, String name) {
-		try (Tensor t = Tensor.create(value)) {
-			return graph.opBuilder("Const", name).setAttr("dtype", t.dataType()).setAttr("value", t).build().output(0);
+		Tensor tensorVal;
+		if (!(value instanceof Tensor)) {
+			tensorVal = Tensor.create(value);
 		}
+		else {
+			tensorVal = (Tensor) value;
+		}
+		return graph.opBuilder("Const", name).setAttr("dtype", tensorVal.dataType()).setAttr("value", tensorVal).build().output(0);
+	}
+
+	public Output variable(Object value, String name) {
+		Tensor tensorVal;
+		if (!(value instanceof Tensor)) {
+			tensorVal = Tensor.create(value);
+		}
+		else {
+			tensorVal = (Tensor) value;
+		}
+		
+		
+		long[] shape2 = tensorVal.shape();
+		Shape shape = Shape.make(1);
+		return graph.opBuilder("Variable", name).setAttr("dtype", tensorVal.dataType()).setAttr("shape", shape).build().output(0);
 	}
 
 	private Output binaryOp(String type, Output in1, Output in2) {
@@ -68,6 +93,14 @@ class TensorFlowAPI implements AutoCloseable {
 
 	private Output binaryOp(String type, String name, Output in1, Output in2) {
 		return graph.opBuilder(type, name).addInput(in1).addInput(in2).build().output(0);
+	}
+
+	public Tensor run(Output out, Map<String, Tensor> dict) {
+		Runner runner = defaultSession.runner();
+		for (Entry<String, Tensor> e: dict.entrySet()) {
+			runner.feed(e.getKey(), e.getValue());
+		}
+		return runner.fetch(out.op().name()).run().get(0);
 	}
 
 	public Tensor run(Output e) {
@@ -98,4 +131,19 @@ class TensorFlowAPI implements AutoCloseable {
 		}
 		graph.close();
 	}
+
+	public Output placeholder(DataType dataType, Shape make, String name) {
+		return graph.opBuilder("Placeholder", name).setAttr("dtype", dataType).build().output(0);
+	}
+
+	public Output reduce_prod(Output in1, String name) {
+		Output idx = constant(0, "reduce_prod_idx");
+		return graph.opBuilder("Prod", name).addInput(in1).addInput(idx).build().output(0);
+	}
+
+	public Output reduce_sum(Output in1, String name) {
+		Output idx = constant(0, "reduce_sum_idx");
+		return graph.opBuilder("Sum", name).addInput(in1).addInput(idx).build().output(0);
+	}
+
 }
