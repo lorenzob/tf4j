@@ -2,11 +2,13 @@ package nottrz.tf4j.samples;
 
 import static java.lang.System.out;
 import static nottrz.tf4j.core.TfData.*;
+import static org.junit.Assert.*;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
+import org.junit.Test;
 import org.tensorflow.DataType;
 import org.tensorflow.Graph;
 import org.tensorflow.Output;
@@ -18,7 +20,8 @@ import nottrz.tf4j.core.TensorFlowAPI;
 
 public class Placeholders {
 
-	public static void main(String[] args) {
+	@Test
+	public void main() {
 
 		try (TensorFlowAPI tf = new TensorFlowAPI()) {
 			
@@ -33,6 +36,7 @@ public class Placeholders {
 				Map<String, Tensor> dict = dict("my_input", vector(20));
 				Tensor res = tf.run(d, dict);
 				out.println(res.intValue());
+				assertEquals(40, res.intValue());
 			}
 		}
 	}

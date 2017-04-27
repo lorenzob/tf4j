@@ -1,7 +1,9 @@
 package nottrz.tf4j.samples;
 
 import static java.lang.System.out;
+import static org.junit.Assert.assertEquals;
 
+import org.junit.Test;
 import org.tensorflow.Graph;
 import org.tensorflow.Output;
 import org.tensorflow.Session;
@@ -11,7 +13,8 @@ import nottrz.tf4j.core.TensorFlowAPI;
 
 public class Variables {
 
-	public static void main(String[] args) {
+	@Test
+	public void main() {
 
 		try (TensorFlowAPI tf = new TensorFlowAPI()) {
 			
@@ -27,6 +30,7 @@ public class Variables {
 				
 				Tensor res = tf.run(e);
 				out.println(res.intValue());
+				assertEquals(23, res.intValue());
 			}
 		}
 	}

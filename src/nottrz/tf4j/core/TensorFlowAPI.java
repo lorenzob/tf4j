@@ -1,10 +1,12 @@
 package nottrz.tf4j.core;
 
+import java.lang.reflect.Array;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.tensorflow.DataType;
 import org.tensorflow.Graph;
+import org.tensorflow.OperationBuilder;
 import org.tensorflow.Output;
 import org.tensorflow.Session;
 import org.tensorflow.Session.Runner;
@@ -81,10 +83,17 @@ public class TensorFlowAPI implements AutoCloseable {
 			tensorVal = (Tensor) value;
 		}
 		
-		
 		long[] shape2 = tensorVal.shape();
-		Shape shape = Shape.make(1);
-		return graph.opBuilder("Variable", name).setAttr("dtype", tensorVal.dataType()).setAttr("shape", shape).build().output(0);
+		Shape shape = Shape.scalar();
+		OperationBuilder builder = graph.opBuilder("Variable", name);
+		Output variable = builder.setAttr("dtype", tensorVal.dataType()).setAttr("shape", shape).build().output(0);
+		
+		Output oValue = constant(value, name + "_value");
+		return graph.opBuilder("Assign", "Assign/" + variable.op().name()).addInput(variable).addInput(oValue).build().output(0);
+
+		// WValue = Array.fill(numFeatures)(Array.fill(hiddenDim)(0.0));
+		// W = builder.variable("W", DataType.DOUBLE, Shape.make(numFeatures, hiddenDim));
+		// W_init = builder.assign(builder.constant("Wval", WValue), W);
 	}
 
 	private Output binaryOp(String type, Output in1, Output in2) {
